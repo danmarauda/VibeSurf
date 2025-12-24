@@ -1,5 +1,5 @@
-import { expect, test } from "@playwright/test";
-import { addLegacyComponents } from "../../utils/add-legacy-components";
+import { expect } from "@playwright/test";
+import { test } from "../../fixtures";
 import { awaitBootstrapTest } from "../../utils/await-bootstrap-test";
 
 test(
@@ -19,7 +19,7 @@ test(
     await page.waitForSelector('[data-testid="zoom_out"]', {
       timeout: 3000,
     });
-    await page.getByTestId("canvas_controls_dropdown").click();
+    await page.getByTestId("canvas_controls_dropdown").click({ force: true });
 
     await page.getByTestId("sidebar-custom-component-button").click();
 

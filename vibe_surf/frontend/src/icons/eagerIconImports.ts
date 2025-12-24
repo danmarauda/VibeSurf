@@ -25,7 +25,6 @@ import { CouchbaseIcon } from "@/icons/Couchbase";
 import { CrewAiIcon } from "@/icons/CrewAI";
 import { DeepSeekIcon } from "@/icons/DeepSeek";
 import { DoclingIcon } from "@/icons/Docling";
-import { DouyinIcon } from "@/icons/Douyin";
 import { DropboxIcon } from "@/icons/Dropbox";
 import { DuckDuckGoIcon } from "@/icons/DuckDuckGo";
 import { ElasticsearchIcon } from "@/icons/ElasticsearchStore";
@@ -107,14 +106,13 @@ import { UnstructuredIcon } from "@/icons/Unstructured";
 import { UpstashSvgIcon } from "@/icons/Upstash";
 import { VectaraIcon } from "@/icons/VectaraIcon";
 import { VertexAIIcon } from "@/icons/VertexAI";
+import { VllmIcon } from "@/icons/vLLM";
+import { VLMRunIcon } from "@/icons/VLMRun";
 import { WeaviateIcon } from "@/icons/Weaviate";
-import { WeiboIcon } from "@/icons/Weibo";
-import { ZhihuIcon } from "@/icons/Zhihu";
 import { WikipediaIcon } from "@/icons/Wikipedia";
 import { WolframIcon } from "@/icons/Wolfram";
 import { XAIIcon } from "@/icons/xAI";
-import { XiaohongshuIcon } from "@/icons/Xiaohongshu";
-import { YouTubeSvgIcon as YouTubeIcon } from "@/icons/Youtube";
+import { YoutubeIcon as YouTubeIcon } from "@/icons/Youtube";
 import { ZepMemoryIcon } from "@/icons/ZepMemory";
 import { JigsawStackIcon } from "./JigsawStack";
 import { WindsurfIcon } from "./Windsurf";
@@ -149,7 +147,6 @@ export const eagerIconsMapping = {
   CrewAI: CrewAiIcon,
   DeepSeek: DeepSeekIcon,
   Docling: DoclingIcon,
-  Douyin: DouyinIcon,
   Dropbox: DropboxIcon,
   DuckDuckGo: DuckDuckGoIcon,
   ElasticsearchStore: ElasticsearchIcon,
@@ -227,18 +224,17 @@ export const eagerIconsMapping = {
   ThumbUpCustom: ThumbUpIconCustom,
   TwelveLabs: TwelveLabsIcon,
   Unstructured: UnstructuredIcon,
+  VLMRun: VLMRunIcon,
   Upstash: UpstashSvgIcon,
   Vectara: VectaraIcon,
   VertexAI: VertexAIIcon,
+  vLLM: VllmIcon,
   WatsonxAI: WatsonxAiIcon,
   Weaviate: WeaviateIcon,
-  Weibo: WeiboIcon,
-  Zhihu: ZhihuIcon,
   Wikipedia: WikipediaIcon,
   Windsurf: WindsurfIcon,
   Wolfram: WolframIcon,
   xAI: XAIIcon,
-  Xiaohongshu: XiaohongshuIcon,
   YouTube: YouTubeIcon,
   ZepMemory: ZepMemoryIcon,
 };

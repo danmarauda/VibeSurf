@@ -62,7 +62,12 @@ export type DropDownComponent = {
   handleNodeClass: (value: any, code?: string, type?: string) => void;
   options: string[];
   optionsMetaData?: any[];
-  onSelect: (value: string, dbValue?: boolean, snapshot?: boolean) => void;
+  onSelect: (
+    value: string,
+    dbValue?: boolean,
+    snapshot?: boolean,
+    selectedMetadata?: any,
+  ) => void;
   editNode?: boolean;
   id?: string;
   children?: ReactNode;
@@ -99,6 +104,7 @@ export type NodeOutputFieldComponentType = {
   data: NodeDataType;
   title: string;
   id: sourceHandleType;
+  loopInputId?: sourceHandleType;
   colors: string[];
   tooltipTitle: string | undefined;
   showNode: boolean;

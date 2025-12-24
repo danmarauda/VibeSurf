@@ -21,7 +21,6 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { useShallow } from "zustand/react/shallow";
 import { DefaultEdge } from "@/CustomEdges";
 import NoteNode from "@/CustomNodes/NoteNode";
-import MediaPlayerNode from "@/CustomNodes/MediaPlayerNode";
 import FlowToolbar from "@/components/core/flowToolbarComponent";
 import {
   COLOR_OPTIONS,
@@ -43,6 +42,7 @@ import {
   UPLOAD_ERROR_ALERT,
   WRONG_FILE_ERROR_ALERT,
 } from "../../../../constants/alerts_constants";
+import ExportModal from "../../../../modals/exportModal";
 import useAlertStore from "../../../../stores/alertStore";
 import useFlowStore from "../../../../stores/flowStore";
 import useFlowsManagerStore from "../../../../stores/flowsManagerStore";
@@ -53,7 +53,6 @@ import type {
   AllNodeType,
   EdgeType,
   NoteNodeType,
-  MediaPlayerNodeType,
 } from "../../../../types/flow";
 import {
   generateFlow,
@@ -86,7 +85,6 @@ import isWrappedWithClass from "./utils/is-wrapped-with-class";
 const nodeTypes = {
   genericNode: GenericNode,
   noteNode: NoteNode,
-  mediaPlayerNode: MediaPlayerNode,
 };
 
 const edgeTypes = {
@@ -134,9 +132,13 @@ export default function Page({
     (state) => state.setLastCopiedSelection,
   );
   const onConnect = useFlowStore((state) => state.onConnect);
+  const setRightClickedNodeId = useFlowStore(
+    (state) => state.setRightClickedNodeId,
+  );
   const setErrorData = useAlertStore((state) => state.setErrorData);
   const updateCurrentFlow = useFlowStore((state) => state.updateCurrentFlow);
   const [selectionMenuVisible, setSelectionMenuVisible] = useState(false);
+  const [openExportModal, setOpenExportModal] = useState(false);
   const edgeUpdateSuccessful = useRef(true);
 
   const isLocked = useFlowStore(
@@ -155,7 +157,6 @@ export default function Page({
   }, [currentFlowId]);
 
   const [isAddingNote, setIsAddingNote] = useState(false);
-  const [isAddingMediaPlayer, setIsAddingMediaPlayer] = useState(false);
 
   const addComponent = useAddComponent();
 
@@ -331,6 +332,20 @@ export default function Page({
     }
   }
 
+  function handleEscape(e: KeyboardEvent) {
+    if (e.key === "Escape") {
+      setRightClickedNodeId(null);
+    }
+  }
+
+  function handleDownload(e: KeyboardEvent) {
+    if (!isWrappedWithClass(e, "noflow")) {
+      e.preventDefault();
+      (e as unknown as Event).stopImmediatePropagation();
+      setOpenExportModal(true);
+    }
+  }
+
   const undoAction = useShortcutsStore((state) => state.undo);
   const redoAction = useShortcutsStore((state) => state.redo);
   const redoAltAction = useShortcutsStore((state) => state.redoAlt);
@@ -340,6 +355,7 @@ export default function Page({
   const groupAction = useShortcutsStore((state) => state.group);
   const cutAction = useShortcutsStore((state) => state.cut);
   const pasteAction = useShortcutsStore((state) => state.paste);
+  const downloadAction = useShortcutsStore((state) => state.download);
   //@ts-ignore
   useHotkeys(undoAction, handleUndo);
   //@ts-ignore
@@ -359,7 +375,11 @@ export default function Page({
   //@ts-ignore
   useHotkeys(deleteAction, handleDelete);
   //@ts-ignore
+  useHotkeys(downloadAction, handleDownload);
+  //@ts-ignore
   useHotkeys("delete", handleDelete);
+  //@ts-ignore
+  useHotkeys("escape", handleEscape);
 
   const onConnectMod = useCallback(
     (params: Connection) => {
@@ -580,14 +600,38 @@ export default function Page({
   const onSelectionChange = useCallback(
     (flow: OnSelectionChangeParams): void => {
       setLastSelection(flow);
+      if (flow.nodes && (flow.nodes.length === 0 || flow.nodes.length > 1)) {
+        setRightClickedNodeId(null);
+      }
     },
-    [],
+    [setRightClickedNodeId],
+  );
+
+  const onNodeContextMenu = useCallback(
+    (event: React.MouseEvent, node: AllNodeType) => {
+      event.preventDefault();
+      if (isLocked) return;
+
+      // Set the right-clicked node ID to show its dropdown menu
+      setRightClickedNodeId(node.id);
+
+      // Focus/select the right-clicked node (same as left-click behavior)
+      setNodes((currentNodes) => {
+        return currentNodes.map((n) => ({
+          ...n,
+          selected: n.id === node.id,
+        }));
+      });
+    },
+    [isLocked, setRightClickedNodeId, setNodes],
   );
 
   const onPaneClick = useCallback(
     (event: React.MouseEvent) => {
       setFilterEdge([]);
       setFilterComponent("");
+      // Hide right-click dropdown when clicking on the pane
+      setRightClickedNodeId(null);
       if (isAddingNote) {
         const shadowBox = document.getElementById("shadow-box");
         if (shadowBox) {
@@ -622,53 +666,14 @@ export default function Page({
         // Signal sidebar to revert add_note active state
         window.dispatchEvent(new Event("lf:end-add-note"));
       }
-      if (isAddingMediaPlayer) {
-        const shadowBox = document.getElementById("shadow-box-media");
-        if (shadowBox) {
-          shadowBox.style.display = "none";
-        }
-        const position = reactFlowInstance?.screenToFlowPosition({
-          x: event.clientX - shadowBoxWidth / 2,
-          y: event.clientY - shadowBoxHeight / 2,
-        });
-        const data = {
-          node: {
-            description: "",
-            display_name: "Media Player",
-            documentation: "",
-            template: {
-              mediaUrl: { value: "" },
-            },
-          },
-          type: "mediaPlayerNode",
-        };
-        const newId = getNodeId("mediaPlayerNode");
-
-        const newNode: MediaPlayerNodeType = {
-          id: newId,
-          type: "mediaPlayerNode",
-          position: position || { x: 0, y: 0 },
-          data: {
-            ...data,
-            id: newId,
-          },
-        };
-        setNodes((nds) => nds.concat(newNode));
-        setIsAddingMediaPlayer(false);
-        // Signal sidebar to revert add_media_player active state
-        window.dispatchEvent(new Event("lf:end-add-media-player"));
-      }
     },
     [
       isAddingNote,
-      isAddingMediaPlayer,
       setNodes,
       reactFlowInstance,
       getNodeId,
       setFilterEdge,
       setFilterComponent,
-      shadowBoxWidth,
-      shadowBoxHeight,
     ],
   );
 
@@ -702,14 +707,6 @@ export default function Page({
           shadowBox.style.top = `${event.clientY - shadowBoxHeight / 2}px`;
         }
       }
-      if (isAddingMediaPlayer) {
-        const shadowBox = document.getElementById("shadow-box-media");
-        if (shadowBox) {
-          shadowBox.style.display = "block";
-          shadowBox.style.left = `${event.clientX - shadowBoxWidth / 2}px`;
-          shadowBox.style.top = `${event.clientY - shadowBoxHeight / 2}px`;
-        }
-      }
     };
 
     document.addEventListener("mousemove", handleGlobalMouseMove);
@@ -717,7 +714,7 @@ export default function Page({
     return () => {
       document.removeEventListener("mousemove", handleGlobalMouseMove);
     };
-  }, [isAddingNote, isAddingMediaPlayer, shadowBoxWidth, shadowBoxHeight]);
+  }, [isAddingNote, shadowBoxWidth, shadowBoxHeight]);
 
   // Listen for a global event to start the add-note flow from outside components
   useEffect(() => {
@@ -731,21 +728,9 @@ export default function Page({
       }
     };
 
-    const handleStartAddMediaPlayer = () => {
-      setIsAddingMediaPlayer(true);
-      const shadowBox = document.getElementById("shadow-box-media");
-      if (shadowBox) {
-        shadowBox.style.display = "block";
-        shadowBox.style.left = `${position.current.x - shadowBoxWidth / 2}px`;
-        shadowBox.style.top = `${position.current.y - shadowBoxHeight / 2}px`;
-      }
-    };
-
     window.addEventListener("lf:start-add-note", handleStartAddNote);
-    window.addEventListener("lf:start-add-media-player", handleStartAddMediaPlayer);
     return () => {
       window.removeEventListener("lf:start-add-note", handleStartAddNote);
-      window.removeEventListener("lf:start-add-media-player", handleStartAddMediaPlayer);
     };
   }, [shadowBoxWidth, shadowBoxHeight]);
 
@@ -821,6 +806,7 @@ export default function Page({
               onPaneClick={onPaneClick}
               onEdgeClick={handleEdgeClick}
               onKeyDown={handleKeyDown}
+              onNodeContextMenu={onNodeContextMenu}
             >
               <FlowBuildingComponent />
               <UpdateAllComponents />
@@ -841,24 +827,13 @@ export default function Page({
               display: "none",
             }}
           ></div>
-          <div
-            id="shadow-box-media"
-            style={{
-              position: "absolute",
-              width: `${shadowBoxWidth}px`,
-              height: `${shadowBoxHeight}px`,
-              backgroundColor: "#3b82f6",
-              opacity: 0.7,
-              pointerEvents: "none",
-              display: "none",
-            }}
-          ></div>
         </>
       ) : (
         <div className="flex h-full w-full items-center justify-center">
           <CustomLoader remSize={30} />
         </div>
       )}
+      <ExportModal open={openExportModal} setOpen={setOpenExportModal} />
     </div>
   );
 }

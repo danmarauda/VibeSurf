@@ -9,7 +9,7 @@ LLM_PROVIDERS = {
     "openai": [
         "gpt-4o",
         "gpt-4o-mini",
-        "gpt-4.1"
+        "gpt-4.1",
         "gpt-4.1-mini",
         "gpt-5",
         "gpt-5-mini",
@@ -21,6 +21,8 @@ LLM_PROVIDERS = {
         "claude-3-5-haiku-20241022"
     ],
     "google": [
+        "gemini-3-flash-preview",
+        "gemini-3-pro-preview",
         "gemini-2.5-pro",
         "gemini-2.5-flash",
     ],
@@ -52,10 +54,32 @@ LLM_PROVIDERS = {
         "qwen3:latest",
     ],
     "openrouter": [
-        "deepseek/deepseek-chat-v3.1",
-        "qwen/qwen3-235b-a22b-thinking-2507",
+        # Gemini 3 (Latest)
+        "google/gemini-3-flash-preview",
+        "google/gemini-3-pro-preview",
+        "google/gemini-3-pro-image-preview",
+        # Gemini 2.5
+        "google/gemini-2.5-flash-preview-09-2025",
+        "google/gemini-2.5-flash-lite-preview-09-2025",
+        "google/gemini-2.5-flash-image",
+        # Claude 4.5 (Latest)
+        "anthropic/claude-opus-4.5",
+        "anthropic/claude-sonnet-4.5",
+        "anthropic/claude-haiku-4.5",
+        # DeepSeek v3.2 (Latest)
+        "deepseek/deepseek-v3.2",
+        "deepseek/deepseek-v3.2-speciale",
+        # Qwen3 (Latest)
+        "qwen/qwen3-max",
+        "qwen/qwen3-coder-plus",
+        "qwen/qwen3-vl-235b-a22b-instruct",
+        # GLM (Zhipu AI)
+        "z-ai/glm-4.6v",
+        "z-ai/glm-4.6",
+        "z-ai/glm-4.5-air:free",
+        # Others
         "moonshotai/kimi-k2",
-        "z-ai/glm-4.5"
+        "openai/gpt-4o",
     ],
     "deepseek": [
         "deepseek-chat",
@@ -104,7 +128,7 @@ PROVIDER_METADATA = {
         "supports_base_url": False,
         "supports_tools": True,
         "supports_vision": True,
-        "default_model": "gemini-2.5-flash"
+        "default_model": "gemini-3-flash-preview"
     },
     "azure_openai": {
         "display_name": "Azure OpenAI",
@@ -137,7 +161,7 @@ PROVIDER_METADATA = {
         "supports_base_url": False,
         "supports_tools": True,
         "supports_vision": True,
-        "default_model": "moonshotai/kimi-k2",
+        "default_model": "google/gemini-3-flash-preview",
         "base_url": "https://openrouter.ai/api/v1"
     },
     "deepseek": {
